@@ -45,7 +45,9 @@ class Console(cream.Module):
 
         self.window.add(self.notebook)
 
-        self.config.connect('field-value-changed', self.on_option_changed_cb)
+        for option, field in self.config.fields.iteritems():
+            field.connect('value-changed',
+                          getattr(self, 'on_%s_changed_cb' % option))
 
 
     def main(self):
@@ -55,20 +57,21 @@ class Console(cream.Module):
         cream.Module.main(self)
 
 
-    def on_option_changed_cb(self, sender, field, new_value):
+    def on_background_color_changed_cb(self, sender, field, bgcolor):
+        for term in self.terminals:
+            term.set_color_background(gtk.gdk.color_parse(bgcolor.to_string()))
 
-        if field.field_var == 'background_color':
-            for terminal in self.terminals:
-                terminal.set_color_background(gtk.gdk.color_parse(new_value.to_string()))
-        elif field.field_var == 'foreground_color':
-            for terminal in self.terminals:
-                terminal.set_color_foreground(gtk.gdk.color_parse(new_value.to_string()))
-        elif field.field_var == 'font':
-            for terminal in self.terminals:
-                terminal.set_font(self.config.font.to_string())
-        elif field.field_var == 'lines':
-            for terminal in self.terminals:
-                terminal.set_scrollback_lines(self.config.lines)
+    def on_foreground_color_changed_cb(self, sender, field, fgcolor):
+        for term in self.terminals:
+            term.set_color_foreground(gtk.gdk.color_parse(fgcolor.to_string()))
+
+    def on_font_changed_cb(self, sender, field, font):
+        for terminal in self.terminals:
+            terminal.set_font(font.to_string())
+
+    def on_lines_changed_cb(self, sender, field, lines):
+        for terminal in self.terminals:
+            terminal.set_scrollback_lines(lines)
 
 
     def switch_page_cb(self, notebook, page, num):
