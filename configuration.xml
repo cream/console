@@ -1,0 +1,6 @@
+<configuration>
+    <background_color field="color" label="Background color">#000000</background_color>
+    <foreground_color field="color" label="Foreground color">#FFFFFF</foreground_color>
+    <font field="font" label="Font" >Monospace 10</font>
+    <lines field="float" label="Lines to scroll back" max="inf">500</lines>
+</configuration>
