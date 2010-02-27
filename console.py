@@ -6,7 +6,6 @@ import gtk
 import vte
 
 import cream
-import cream.ipc
 
 KEY_BINDINGS = {
     gtk.keysyms.T: 'new_tab',
@@ -17,8 +16,6 @@ KEY_BINDINGS = {
 DEFAULT_TITLE = "Cream Terminal"
 
 class Console(cream.Module):
-
-    __ipc_domain__ = 'org.cream.console'
 
     def __init__(self):
 
