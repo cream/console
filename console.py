@@ -194,7 +194,7 @@ class Console(cream.Module):
 
     def show_preferences(self):
 
-        self.config.show_window()
+        self.config.show_dialog()
 
 
     def key_cb(self, widget, event):
