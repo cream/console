@@ -19,7 +19,7 @@ class Console(cream.Module):
 
     def __init__(self):
 
-        cream.Module.__init__(self)
+        cream.Module.__init__(self, 'org.cream.Console')
 
         self.terminals = []
 
@@ -87,7 +87,7 @@ class Console(cream.Module):
 
 
     def reorder_page_cb(self, notebook, page, num):
-        print num
+        pass
 
 
     def remove_page_cb(self, notebook, page, num):

@@ -1,5 +1,5 @@
 <?xml version="1.0" ?>
-<manifest namespace="org.cream" version="0.0.5">
+<manifest namespace="org.cream" version="0.0.8">
     <component name="Console" id=".Console" version="0.1" type=".Module" entry="console.py">
         <license title="GPL" version="3+" />
 
