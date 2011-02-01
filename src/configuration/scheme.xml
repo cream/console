@@ -1,4 +1,5 @@
 <configuration>
+    <tab_indicators type="boolean" label="Enable colored tab indicators">True</tab_indicators> 
     <background_color type="color" label="Background color">#000000</background_color>
     <foreground_color type="color" label="Foreground color">#FFFFFF</foreground_color>
     <font type="font" label="Font" >Monospace 10</font>

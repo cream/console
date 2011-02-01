@@ -34,6 +34,8 @@ setup(
     author = 'The Cream Project (http://cream-project.org)',
     url = 'http://github.com/cream/console',
     data_files = data_files,
+    package_dir = {'console': 'src/console'},
+    packages = ['console'],
     cmdclass={'install_scripts': post_install},
     scripts = ['src/console.py']
 )

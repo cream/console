@@ -3,9 +3,13 @@
 
 import os
 import gtk
+import pango
 import vte
+from random import random
 
 import cream
+
+import console
 
 KEY_BINDINGS = {
     gtk.keysyms.T: 'new_tab',
@@ -14,6 +18,41 @@ KEY_BINDINGS = {
 }
 
 DEFAULT_TITLE = "Cream Terminal"
+
+COLORS = [
+    (.5, 0, 0),
+    (0, .5, 0),
+    (0, 0, .5),
+    (.5, .5, 0),
+    (0, .5, .5),
+    (.5, 0, .5),
+    (.3, 0, 0),
+    (0, .3, 0),
+    (0, 0, .3),
+    (.3, .3, 0),
+    (0, .3, .3),
+    (.3, 0, .3),
+    (.7, 0, 0),
+    (0, .7, 0),
+    (0, 0, .7),
+    (.7, .7, 0),
+    (0, .7, .7),
+    (.7, 0, .7),
+    ]
+
+COLORS_USED = 0
+
+def get_tab_color():
+    global COLORS_USED
+    n = COLORS_USED
+    COLORS_USED += 1
+    if n < len(COLORS):
+        return COLORS[n]
+    else:
+        r = random()
+        g = random()
+        b = random()
+        return (r, g, b)
 
 class Console(cream.Module):
 
@@ -70,6 +109,9 @@ class Console(cream.Module):
         for terminal in self.terminals:
             terminal.set_scrollback_lines(lines)
 
+    def on_tab_indicators_changed_cb(self, sender, field, value):
+        pass
+
 
     def switch_page_cb(self, notebook, page, num):
 
@@ -103,10 +145,19 @@ class Console(cream.Module):
     def terminal_title_changed_cb(self, terminal):
 
         title = terminal.get_window_title() or DEFAULT_TITLE
-        if len(title) > 25:
-            title = title[:22] + "..."
+        
+        tab = self.notebook.get_tab_label(terminal)
 
-        self.notebook.set_tab_label(terminal, gtk.Label(title))
+        label = gtk.Label(title)
+        label.set_ellipsize(pango.ELLIPSIZE_END)
+
+        if self.config.tab_indicators:
+            tab.remove(tab.get_children()[1])
+            tab.pack_start(label, True, True, 5)
+        else:
+            tab.remove(tab.get_children()[0])
+            tab.pack_start(label, True, True, 0)
+        tab.show_all()
 
         if self.notebook.page_num(terminal) == self.notebook.get_current_page():
             self.window.set_title(terminal.get_window_title() or DEFAULT_TITLE)
@@ -165,7 +216,17 @@ class Console(cream.Module):
         terminal.set_font(self.config.font.to_string())
 
         # Appending the terminal widget to the notebook.
-        num = self.notebook.append_page(terminal, gtk.Label(DEFAULT_TITLE))
+        n = self.notebook.get_n_pages()
+        tab = gtk.HBox()
+        label = gtk.Label(DEFAULT_TITLE)
+        label.set_ellipsize(pango.ELLIPSIZE_END)
+        if self.config.tab_indicators:
+            tab.pack_start(console.TerminalIcon(color=get_tab_color()), False, False, 0)
+            tab.pack_start(label, True, True, 5)
+        else:
+            tab.pack_start(label, True, True, 0)
+        tab.show_all()
+        num = self.notebook.append_page(terminal, tab)
         self.notebook.set_tab_reorderable(terminal, True)
         self.notebook.set_tab_label_packing(terminal, True, True, gtk.PACK_START)
 
@@ -215,5 +276,5 @@ class Console(cream.Module):
 
 
 if __name__ == '__main__':
-    console = Console()
-    console.main()
+    c = Console()
+    c.main()
