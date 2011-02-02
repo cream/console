@@ -1,6 +1,6 @@
 <?xml version="1.0" ?>
-<manifest namespace="org.cream" version="0.0.8">
-    <component name="Console" id=".Console" version="0.1" type=".Module" entry="console.py">
+<manifest namespace="org.cream">
+    <component name="Console" id=".Console" version="0.0.9" type=".Module" entry="console.py">
         <license title="GPL" version="3+" />
 
         <use-feature id=".config" />

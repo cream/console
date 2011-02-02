@@ -30,7 +30,7 @@ data_files.extend(
 
 setup(
     name = 'console',
-    version = '0.0.8',
+    version = '0.0.9',
     author = 'The Cream Project (http://cream-project.org)',
     url = 'http://github.com/cream/console',
     data_files = data_files,
