@@ -1,7 +1,7 @@
 <configuration>
-    <tab_indicators type="boolean" label="Enable colored tab indicators">True</tab_indicators> 
-    <background_color type="color" label="Background color">#000000</background_color>
-    <foreground_color type="color" label="Foreground color">#FFFFFF</foreground_color>
+    <background_color type="color" label="Background color">#FFFFFF</background_color>
+    <foreground_color type="color" label="Foreground color">#111111</foreground_color>
     <font type="font" label="Font" >Monospace 10</font>
     <lines type="integer" label="Lines to scroll back" max="inf">500</lines>
+    <tab_indicators type="boolean" label="Enable colored tab indicators">True</tab_indicators>
 </configuration>
