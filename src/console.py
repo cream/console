@@ -3,11 +3,13 @@
 
 import os
 import gtk
+import math
 import pango
 import vte
 from random import random
 
 import cream
+import cream.gui
 
 import console
 
@@ -18,6 +20,7 @@ KEY_BINDINGS = {
 }
 
 DEFAULT_TITLE = "Cream Terminal"
+HOT_CORNER_RADIUS = 18
 
 COLORS = [
     (.5, 0, 0),
@@ -198,7 +201,17 @@ class Console(cream.Module):
         # Creating and setting up the terminal widget...
         terminal = vte.Terminal()
         terminal.set_size_request(0, 0)
+        terminal.set_app_paintable(True)
+        
+        terminal.hot_corner_hover = False
+        terminal.hot_corner_alpha = .2
+        terminal.current_animation = None
 
+        terminal.connect_after('expose-event', self.terminal_expose_cb)
+        terminal.connect('motion-notify-event', self.terminal_motion_notify_cb)
+        terminal.connect('button-press-event', self.terminal_button_press_cb)
+        terminal.connect('leave-notify-event', self.terminal_leave_notify_cb)
+        terminal.connect('button-release-event', self.terminal_button_release_cb)
         terminal.connect('child-exited', self.close_tab_cb)
         terminal.connect('window-title-changed', self.terminal_title_changed_cb)
         terminal.connect('beep', self.terminal_beep_cb)
@@ -256,6 +269,87 @@ class Console(cream.Module):
     def show_preferences(self):
 
         self.config.show_dialog()
+        
+        
+    def terminal_expose_cb(self, terminal, event=None):
+    
+        x, y, width, height = terminal.get_allocation()
+        ctx = terminal.window.cairo_create()
+        
+        if event:
+            ctx.rectangle(*event.area)
+            ctx.clip()
+        
+        ctx.arc(width, height, HOT_CORNER_RADIUS, 0, 2*math.pi)
+        ctx.set_source_rgba(0, 0, 0, terminal.hot_corner_alpha)
+        ctx.fill()
+        
+        
+    def fade_hot_corner(self, terminal, alpha):
+        
+        x, y, width, height = terminal.get_allocation()
+        
+        def update_cb(timeline, state):
+            terminal.hot_corner_alpha = start_alpha + state*(alpha - start_alpha)
+            terminal.window.invalidate_rect(gtk.gdk.Rectangle(width-HOT_CORNER_RADIUS, height-HOT_CORNER_RADIUS, HOT_CORNER_RADIUS, HOT_CORNER_RADIUS), True)
+            
+        if terminal.current_animation:
+            terminal.current_animation.stop()
+            
+        start_alpha = terminal.hot_corner_alpha
+        
+        t = cream.gui.Timeline(400, cream.gui.CURVE_SINE)
+        t.connect('update', update_cb)
+        
+        terminal.current_animation = t
+        t.run()
+    
+
+    def terminal_motion_notify_cb(self, terminal, event):
+        
+        x, y, width, height = terminal.get_allocation()
+        if math.sqrt((width - event.x)**2 + (height-event.y)**2) <= HOT_CORNER_RADIUS:
+            cursor = gtk.gdk.Cursor(gtk.gdk.ARROW)
+            terminal.window.set_cursor(cursor)
+            
+            if not terminal.hot_corner_hover:
+                terminal.hot_corner_hover = True
+                self.fade_hot_corner(terminal, .5)
+            return True
+        else:
+            if terminal.hot_corner_hover:
+                terminal.hot_corner_hover = False
+                self.fade_hot_corner(terminal, .2)
+                
+    
+    def terminal_leave_notify_cb(self, terminal, event):
+
+        if terminal.hot_corner_hover:
+            terminal.hot_corner_hover = False
+            self.fade_hot_corner(terminal, .2)
+        
+        
+    def terminal_button_press_cb(self, terminal, event):
+        
+        x, y, width, height = terminal.get_allocation()
+        if math.sqrt((width - event.x)**2 + (height-event.y)**2) <= HOT_CORNER_RADIUS:
+            cursor = gtk.gdk.Cursor(gtk.gdk.ARROW)
+            terminal.window.set_cursor(cursor)
+            return True
+        else:
+            return False
+        
+        
+    def terminal_button_release_cb(self, terminal, event):
+        
+        x, y, width, height = terminal.get_allocation()
+        if math.sqrt((width - event.x)**2 + (height-event.y)**2) <= HOT_CORNER_RADIUS:
+            cursor = gtk.gdk.Cursor(gtk.gdk.ARROW)
+            terminal.window.set_cursor(cursor)
+            self.show_preferences()
+            return True
+        else:
+            return False
 
 
     def key_cb(self, widget, event):
